@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "pl.fuzjajadrowa.thebrokenshift.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "InputConstantsMixin",
+    "KeyboardHandlerMixin",
+    "MouseHandlerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
