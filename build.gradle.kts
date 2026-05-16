@@ -1,23 +1,11 @@
-import java.text.SimpleDateFormat
-import java.util.*
-
 plugins {
     java
-    id("net.neoforged.moddev") version "2.1.20"
-}
-
-tasks.withType<JavaCompile>().configureEach {
-    options.encoding = "UTF-8"
+    id("net.neoforged.moddev") version "2.0.141"
 }
 
 val mod_id: String by project
-val mod_name: String by project
-val mod_license: String by project
 val mod_version: String by project
-val mod_authors: String by project
-val mod_description: String by project
 val mod_group_id: String by project
-val minecraft_version: String by project
 val neo_version: String by project
 
 group = mod_group_id
@@ -32,11 +20,11 @@ java {
 }
 
 neoForge {
-    version.set(neo_version)
+    version = neo_version
 
     parchment {
-        mappingsVersion.set(project.property("parchment_mappings_version").toString())
-        minecraftVersion.set(project.property("parchment_minecraft_version").toString())
+        mappingsVersion = project.property("parchment_mappings_version").toString()
+        minecraftVersion = project.property("parchment_minecraft_version").toString()
     }
 
     runs {
@@ -47,12 +35,10 @@ neoForge {
 
         create("client") {
             client()
-            gameDirectory.set(project.file("run"))
         }
 
         create("server") {
             server()
-            gameDirectory.set(project.file("run"))
         }
     }
 
@@ -63,27 +49,21 @@ neoForge {
     }
 }
 
-val generateModMetadata = tasks.register<ProcessResources>("generateModMetadata") {
-    inputs.properties(mapOf(
+tasks.withType<ProcessResources>().configureEach {
+    val replaceProperties = mapOf(
         "mod_id" to mod_id,
-        "mod_name" to mod_name,
+        "mod_name" to project.property("mod_name"),
         "mod_version" to mod_version,
-        "mod_description" to mod_description,
-        "mod_authors" to mod_authors,
-        "mod_license" to mod_license,
+        "mod_description" to project.property("mod_description"),
+        "mod_authors" to project.property("mod_authors"),
+        "mod_license" to project.property("mod_license"),
         "minecraft_version_range" to project.property("minecraft_version_range"),
         "neo_version_range" to project.property("neo_version_range"),
         "loader_version_range" to project.property("loader_version_range")
-    ))
-    from(sourceSets.main.get().resources.srcDirs) {
-        include("META-INF/neoforge.mods.toml")
-        expand(inputs.properties)
+    )
+    inputs.properties(replaceProperties)
+
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand(replaceProperties)
     }
-    into(layout.buildDirectory.dir("generated/sources/modMetadata"))
-}
-
-sourceSets.main.get().resources.srcDirs(generateModMetadata.map { it.destinationDir })
-
-tasks.withType<ProcessResources>().configureEach {
-    exclude("META-INF/neoforge.mods.toml")
 }
